@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Sessions - PrepAI</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .sessions-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .session-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .session-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .session-topic {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .session-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+        .session-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .questions-preview {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+        .questions-preview.show {
+            display: block;
+        }
+        .question-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .question-answer {
+            color: #666;
+            font-size: 0.9rem;
+            margin-left: 15px;
+        }
+        .question-feedback {
+            font-size: 0.85rem;
+            color: #28a745;
+            margin-left: 15px;
+        }
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .no-sessions {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h2>🎯 PrepAI</h2>
+        </div>
+        <div class="nav-user">
+            <span id="userEmail"></span>
+            <button id="dashboardNavBtn" style="background: #667eea; padding: 8px 16px; border: none; border-radius: 5px; color: white; cursor: pointer; margin-right: 10px;">Dashboard</button>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+    </nav>
+    
+    <div class="sessions-container">
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+        <h1>📚 My Interview Sessions</h1>
+        <div id="sessionsList">Loading...</div>
+    </div>
+    
+    <script type="module">
+        import { auth, signOut } from './js/firebase-config.js';
+        
+        const API_BASE_URL = 'http://localhost:8080';
+        
+        async function loadSessions() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            document.getElementById('userEmail').textContent = user.email;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/interview/user-sessions?userEmail=${user.email}`);
+                const sessions = await response.json();
+                
+                const sessionsList = document.getElementById('sessionsList');
+                
+                if (sessions.length === 0) {
+                    sessionsList.innerHTML = '<div class="no-sessions"><p>No past sessions yet. Start your first interview!</p><button onclick="window.location.href=\'dashboard.html\'" style="margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">Start Interview →</button></div>';
+                    return;
+                }
+                
+                sessionsList.innerHTML = sessions.map(session => `
+                    <div class="session-card" onclick="toggleQuestions(${session.id})">
+                        <div class="session-header">
+                            <span class="session-topic">🎯 ${session.topic}</span>
+                            <span class="session-score">Score: ${session.finalScore || 0}/100</span>
+                        </div>
+                        <div class="session-date">
+                            ${new Date(session.createdAt).toLocaleDateString()} at ${new Date(session.createdAt).toLocaleTimeString()}
+                        </div>
+                        <div id="questions-${session.id}" class="questions-preview">
+                            <small>Click to view questions...</small>
+                        </div>
+                    </div>
+                `).join('');
+                
+                window.sessionsData = sessions;
+                
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                document.getElementById('sessionsList').innerHTML = '<div class="no-sessions"><p>Error loading sessions. Please make sure backend is running.</p></div>';
+            }
+        }
+        
+        window.toggleQuestions = async function(sessionId) {
+            const questionsDiv = document.getElementById(`questions-${sessionId}`);
+            
+            if (questionsDiv.classList.contains('show')) {
+                questionsDiv.classList.remove('show');
+                return;
+            }
+            
+            questionsDiv.innerHTML = '<div class="question-item">Loading questions...</div>';
+            questionsDiv.classList.add('show');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/interview/session-questions?sessionId=${sessionId}`);
+                const questions = await response.json();
+                
+                if (questions.length === 0) {
+                    questionsDiv.innerHTML = '<div class="question-item">No detailed questions available</div>';
+                } else {
+                    questionsDiv.innerHTML = questions.map(q => `
+                        <div class="question-item">
+                            <div class="question-text">📝 ${q.text}</div>
+                            <div class="question-answer">💬 Your answer: ${q.userAnswer || 'Not answered'}</div>
+                            <div class="question-feedback">⭐ Score: ${q.aiScore || 0}/100 - ${q.aiFeedback || 'No feedback'}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                questionsDiv.innerHTML = '<div class="question-item">Error loading questions</div>';
+            }
+        };
+        
+        document.getElementById('dashboardNavBtn').addEventListener('click', () => {
+            window.location.href = 'dashboard.html';
+        });
+        
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = 'index.html';
+        });
+        
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                loadSessions();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Session - PrepAI</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h2>🎯 PrepAI</h2>
+        </div>
+        <div class="nav-user">
+            <span id="topicDisplay"></span>
+            <button id="endSessionBtn" class="danger-btn">End Session</button>
+        </div>
+    </nav>
+    
+    <div class="interview-container">
+        <div class="interview-header">
+            <h1>Technical Interview Session</h1>
+            <div class="progress-indicator">
+                <span>Question <span id="questionCounter">1</span> of <span id="totalQuestions">5</span></span>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="question-card" id="questionCard">
+            <div class="question-text" id="questionText">
+                Loading your first question...
+            </div>
+            
+            <div class="answer-section">
+                <label for="answerInput">Your Answer:</label>
+                <textarea id="answerInput" rows="6" placeholder="Type your answer here... Be detailed and specific to get better evaluation."></textarea>
+                
+                <div class="button-group">
+                    <button id="submitAnswerBtn" class="submit-btn">Submit Answer & Continue</button>
+                    <button id="skipQuestionBtn" class="skip-btn">Skip Question</button>
+                </div>
+            </div>
+            
+            <div class="feedback-section hidden" id="feedbackSection">
+                <div class="feedback-header">
+                    <h3>AI Evaluation</h3>
+                    <span class="score-badge" id="scoreBadge">Score: --</span>
+                </div>
+                <div class="feedback-content" id="feedbackContent">
+                    <!-- Feedback will appear here -->
+                </div>
+                <button id="nextQuestionBtn" class="next-btn">Next Question →</button>
+            </div>
+        </div>
+        
+        <div class="session-complete hidden" id="sessionComplete">
+            <div class="complete-card">
+                <div class="complete-icon">🏆</div>
+                <h2>Interview Complete!</h2>
+                <p>Your final score: <span id="finalScore">0</span>/100</p>
+                <div id="finalFeedback"></div>
+                <button id="dashboardBtn" class="dashboard-redirect-btn">Return to Dashboard</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/interview.js"></script>
+</body>
+</html>

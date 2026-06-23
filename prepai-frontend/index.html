@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepAI - AI Interview Preparation</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>🎯 PrepAI</h1>
+                <p>AI Smart Interview Preparation</p>
+            </div>
+            
+            <div class="login-content">
+                <h2>Welcome to PrepAI</h2>
+                <p>Sign in to start your AI-powered interview practice</p>
+                
+                <button id="googleLoginBtn" class="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    Continue with Google
+                </button>
+                
+                <div id="loadingSpinner" class="spinner hidden"></div>
+                <div id="errorMessage" class="error-message hidden"></div>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <span>🤖</span>
+                    <span>AI-Generated Questions</span>
+                </div>
+                <div class="feature">
+                    <span>📊</span>
+                    <span>Real-time Evaluation</span>
+                </div>
+                <div class="feature">
+                    <span>💡</span>
+                    <span>Detailed Feedback</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>
